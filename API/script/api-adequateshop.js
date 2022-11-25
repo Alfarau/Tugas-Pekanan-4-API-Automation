@@ -1,6 +1,6 @@
+const { TEST_DATA } = require("../data/testData");
 const request = require("supertest")("http://restapi.adequateshop.com");
 const expect =  require("chai").expect;
-const { TEST_DATA } = require("../data/testData");
 
 var randomNum
 var token
@@ -160,6 +160,8 @@ describe("Create User", function(){
                 "location": TEST_DATA.location
             });
 
+        user_ID = response.body.id 
+
         expect(response.status).to.eql(201);
         expect(response.body.name).to.eql(TEST_DATA.user_name);
         expect(response.body.email).to.eql(randomNum+TEST_DATA.user_email);
@@ -193,4 +195,31 @@ describe("Create User", function(){
     })
 })
 
-//////////////////////////////////////////////// API CREATE USER ////////////////////////////////////////////////
+//////////////////////////////////////////////// API GET USER BY ID ////////////////////////////////////////////////
+describe("GET User By ID", function(){
+    it("GET User By ID Success",async function(){
+        const response = await request
+            .get("/api/users/"+user_ID)
+            .set({ Authorization: "Bearer "+token});
+
+        expect(response.status).to.eql(200);
+        expect(response.body.name).to.eql(TEST_DATA.user_name);
+    })
+
+    it("GET User By ID Failed - Invalid User ID",async function(){
+        const response = await request
+            .get("/api/users/InvalidUserID")
+            .set({ Authorization: "Bearer "+token});
+
+        expect(response.status).to.eql(400);
+        expect(response.body.Message).to.eql("The request is invalid.");
+    })
+
+    it("GET User By ID Failed - Invalid Token",async function(){
+        const response = await request
+            .get("/api/users/InvalidUserID")
+            .set({ Authorization: "Bearer 944743cd-510f-4e73-9b30-53c069698891"});
+
+        expect(response.status).to.eql(401);
+    })
+})
